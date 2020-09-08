@@ -6,6 +6,8 @@
 #include <inviwo/core/datastructures/image/layerramprecision.h>
 #include <inviwo/core/util/imageramutils.h>
 
+#include <array>
+
 namespace inviwo {
 
 namespace detail {
@@ -47,14 +49,53 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
             case ImageUpsampler::IntepolationMethod::PiecewiseConstant: {
                 // Task 8
                 // Update finalColor
+                finalColor = inPixels[inIndex(floor(inImageCoords))];
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Bilinear: {
+                // inImageCoords
+                dvec2 black_dot = inImageCoords - 0.5;
+                ivec2 black_dot_floored = ivec2(black_dot);
+
+                // Get neighbour pixels
+                std::array<T, 4> values = { 
+                    inPixels[inIndex(black_dot_floored)],
+                    inPixels[inIndex(black_dot_floored + ivec2(1, 0))],
+                    inPixels[inIndex(black_dot_floored + ivec2(0, 1))],
+                    inPixels[inIndex(black_dot_floored + ivec2(1, 1))]
+                };
+
                 // Update finalColor
+                finalColor = TNM067::Interpolation::bilinear(values, black_dot.x - (int)black_dot.x, black_dot.y - (int)black_dot.y);
+
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Quadratic: {
                 // Update finalColor
+
+                // inImageCoords
+                dvec2 black_dot = inImageCoords - 0.5;
+                ivec2 black_dot_floored = ivec2(black_dot);
+
+                // Get neighbour pixels
+                std::array<T, 9> values = { 
+                    inPixels[inIndex(black_dot_floored)],
+                    inPixels[inIndex(black_dot_floored + ivec2(1, 0))],
+                    inPixels[inIndex(black_dot_floored + ivec2(2, 0))],
+                    inPixels[inIndex(black_dot_floored + ivec2(0, 1))],
+                    inPixels[inIndex(black_dot_floored + ivec2(1, 1))],
+                    inPixels[inIndex(black_dot_floored + ivec2(2, 1))],
+                    inPixels[inIndex(black_dot_floored + ivec2(0, 2))],
+                    inPixels[inIndex(black_dot_floored + ivec2(1, 2))],
+                    inPixels[inIndex(black_dot_floored + ivec2(2, 2))]
+                };
+
+                // Update finalColor
+                double dx = black_dot.x - (int)black_dot.x;
+                double dy = black_dot.y - (int)black_dot.y;
+
+                finalColor = TNM067::Interpolation::biQuadratic(values, dx / 2.0, dy / 2.0);
+
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
@@ -124,6 +165,7 @@ dvec2 ImageUpsampler::convertCoordinate(ivec2 outImageCoords, [[maybe_unused]] s
     dvec2 c(outImageCoords);
 
     // TASK 7: Convert the outImageCoords to its coordinates in the input image
+    c = c * (dvec2(inputSize)/dvec2(outputsize));
 
     return c;
 }
