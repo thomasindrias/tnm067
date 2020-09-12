@@ -99,7 +99,21 @@ void upsample(ImageUpsampler::IntepolationMethod method, const LayerRAMPrecision
                 break;
             }
             case ImageUpsampler::IntepolationMethod::Barycentric: {
+                // inImageCoords
+                dvec2 p = inImageCoords - 0.5;
+                ivec2 p_floored = ivec2(p);
+
+                // Get neighbour pixels
+                std::array<T, 4> values = {inPixels[inIndex(p_floored)],
+                                           inPixels[inIndex(p_floored + ivec2(1, 0))],
+                                           inPixels[inIndex(p_floored + ivec2(0, 1))],
+                                           inPixels[inIndex(p_floored + ivec2(1, 1))]};
+                
                 // Update finalColor
+                finalColor = inviwo::TNM067::Interpolation::barycentric(values, p.x - (int)p.x,
+                                                                        p.y - (int)p.y);
+
+
                 break;
             }
             default:

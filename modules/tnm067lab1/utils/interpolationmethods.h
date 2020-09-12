@@ -108,19 +108,46 @@ T biQuadratic(const std::array<T, 9>& v, F x, F y) {
 
 // clang-format off
     /*
+     C         A
      2---------3
-     |'-.      |
+     |'-.   •  |
      |   -,    |
-   y |  •  -,  |
+   y |    -,   |
      |       -,|
      0---------1
-        x
+        x      B
     */
 // clang-format on
 #define ENABLE_BARYCENTRIC_UNITTEST 1
 template <typename T, typename F = double>
 T barycentric(const std::array<T, 4>& v, F x, F y) {
 
+    T f_A, f_B, f_C;
+    F alfa, beta, gamma;
+
+    f_B = v[1];
+    f_C = v[2];
+
+    //Check which triangle
+    if (x + y > 1.0) {
+        // A = (1, 1) B = (1, 0) C = (1, 0);
+        f_A = v[3];
+        alfa = (x + y) - 1.0;
+        beta = 1.0 - y;
+        gamma = 1.0 - x;
+    } else {
+        // A = (0,0) B = (1,0) C = (1,0);
+        f_A = v[0];
+        alfa = 1.0 - (x + y);
+        beta = x;
+        gamma = y;
+    }
+
+    T f = alfa * f_A + beta * f_B + gamma * f_C;
+
+    return f;
+
+    /*
     double full_area = glm::determinant(glm::dmat3(
         dvec3(v[1], 1.0), dvec3(v[2], 1.0), dvec3(v[3], 1.0))) * 0.5
 
@@ -133,9 +160,7 @@ T barycentric(const std::array<T, 4>& v, F x, F y) {
     double beta = glm::determinant(glm::dmat3(
         dvec3(v[0], 1.0), dvec3(v[2], 1.0), dvec3(v[3], 1.0))) * 0.5 / full_area;
 
-
-
-    return v[0];
+    */
 }
 
 }  // namespace Interpolation
