@@ -43,13 +43,30 @@ void HydrogenGenerator::process() {
 }
 
 vec3 HydrogenGenerator::cartesianToSphereical(vec3 cartesian) {
-    vec3 sph{cartesian};  // TODO implement the conversion
-    return sph;
+    // Euclidean distance
+    const double r{glm::length(cartesian)};
+
+    if (r < 0.0000001) return {0.0, 0.0, 0.0};
+
+    const double theta{acos(cartesian.z / r)};
+    const double phi{atan2(cartesian.y, cartesian.x)};
+
+    return {r, theta, phi};
 }
 
 double HydrogenGenerator::eval(vec3 cartesian) {
-    const double density = cartesian.x;  // TODO implement this
-    return density;
+
+    vec3 spherical = cartesianToSphereical(cartesian);
+
+    const double term1{1.0/(81.0*sqrt(6.0*M_PI))};
+
+    const double term3{(double)spherical.x * spherical.x};
+
+    const double term4{exp(-spherical.x / 3.0)};
+
+    const double term5{3.0 * pow(cos(spherical.y), 2.0) - 1.0};
+    
+    return pow(term1 * term3 * term4* term5, 2.0);
 }
 
 vec3 HydrogenGenerator::idTOCartesian(size3_t pos) {
