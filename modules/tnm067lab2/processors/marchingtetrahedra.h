@@ -65,12 +65,22 @@ public:
     MarchingTetrahedra();
     virtual ~MarchingTetrahedra() = default;
 
+    
+
     virtual void process() override;
 
     virtual const ProcessorInfo getProcessorInfo() const override;
     static const ProcessorInfo processorInfo_;
 
 private:
+    size_t calcTriangleVert(MeshHelper& mesh, const MarchingTetrahedra::Voxel& voxel0, const MarchingTetrahedra::Voxel& voxel1, const float& iso);
+    void calcTriangle(MarchingTetrahedra::MeshHelper& mesh, const float& iso,
+                                          const MarchingTetrahedra::Voxel& vox0,
+                                          const MarchingTetrahedra::Voxel& vox1,
+                                          const MarchingTetrahedra::Voxel& vox2,
+                                          const MarchingTetrahedra::Voxel& vox3,
+                                          const MarchingTetrahedra::Voxel& vox4,
+                                          const MarchingTetrahedra::Voxel& vox5);
     VolumeInport volume_;
     MeshOutport mesh_;
 
